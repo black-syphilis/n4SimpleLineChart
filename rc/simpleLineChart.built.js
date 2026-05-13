@@ -1,600 +1,510 @@
-var _0x478486 = _0x1986;
+define("nmodule/simpleLineChart/rc/SimpleLineChartWidget", [
+  "bajaux/Widget",
+  "bajaux/events",
+  "bajaux/mixin/subscriberMixIn",
+  "nmodule/simpleLineChart/rc/d3/d3.v3.min",
+  "nmodule/simpleLineChart/rc/c3/c3.min",
+  "jquery",
+  "baja!",
+  "nmodule/simpleLineChart/rc/modelHistory",
+  "nmodule/simpleLineChart/rc/dateUtil",
+  "css!nmodule/simpleLineChart/rc/c3/c3.min",
+  "css!nmodule/simpleLineChart/rc/simpleLineChartWidget"
+], function (
+  Widget,
+  events,
+  subscriberMixIn,
+  d3,
+  c3,
+  $,
+  baja,
+  modelHistory,
+  dateUtil
+) {
+  "use strict";
 
-function _0x1986(_0x4dce8d, _0x162116) {
-    var _0x5dd31d = _0x5dd3();
-    return _0x1986 = function (_0x198665, _0x385e6b) {
-        _0x198665 = _0x198665 - 0x1b9;
-        var _0x1c14db = _0x5dd31d[_0x198665];
-        return _0x1c14db;
-    }, _0x1986(_0x4dce8d, _0x162116);
-}(function (_0x1fb9df, _0x1e7a3f) {
-    var _0x3f96f0 = _0x1986,
-        _0x5e7c5d = _0x1fb9df();
-    while (!![]) {
-        try {
-            var _0x5ccb1c = -parseInt(_0x3f96f0(0x206)) / 0x1 + parseInt(_0x3f96f0(0x1cf)) / 0x2 + -parseInt(_0x3f96f0(0x239)) / 0x3 + -parseInt(_0x3f96f0(0x252)) / 0x4 + -parseInt(_0x3f96f0(0x1d6)) / 0x5 + -parseInt(_0x3f96f0(0x1c9)) / 0x6 * (-parseInt(_0x3f96f0(0x220)) / 0x7) + -parseInt(_0x3f96f0(0x232)) / 0x8 * (-parseInt(_0x3f96f0(0x1ca)) / 0x9);
-            if (_0x5ccb1c === _0x1e7a3f) break;
-            else _0x5e7c5d['push'](_0x5e7c5d['shift']());
-        } catch (_0x559635) {
-            _0x5e7c5d['push'](_0x5e7c5d['shift']());
-        }
+  var currentData;
+  var isLicensed = true;
+  var refreshTimer = null;
+
+  var DEFAULTS = {
+    defaultBackgroundColor: "#3D3D3D",
+    defaultBorderColor: "#727272",
+    defaultBorderThickness: 4,
+    defaultDateFormat: "d/M/yy",
+    defaultTitle: "Chart 1",
+    legendLocation: "100,120",
+    lineColor: "#1f77b4",
+    limit: 10,
+    offset: 0,
+    padding: "60,80,60,80",
+    titleXOffset: 50,
+    titleYOffset: 40,
+    titleFontSize: "16px",
+    titleFontColor: "#808080",
+    titleFontWeight: "bold"
+  };
+
+  function SimpleLineChartWidget() {
+    Widget.apply(this, arguments);
+
+    this.properties()
+      .add("backgroundColor", "#3D3D3D")
+      .add("borderColor", "#727272")
+      .add("borderThickness", 4)
+      .add("dateFormat", "d/M/yy")
+      .add("historyBql", "|bql:select timestamp, value order by timestamp DESC")
+      .add("legendLocation", "100,120")
+      .add("limit", 10)
+      .add("lineColor", "#1f77b4")
+      .add("offset", 0)
+      .add("padding", "60,80,60,80")
+      .add("refreshInterval", 60000)
+      .add("titleFontColor", "#fff")
+      .add("titleFontWeight", "bold")
+      .add("titleXOffset", 50)
+      .add("titleYOffset", 40)
+      .add("title", "Chart 1")
+      .add("titleFontSize", "16px");
+
+    subscriberMixIn(this);
+  }
+
+  SimpleLineChartWidget.prototype = Object.create(Widget.prototype);
+  SimpleLineChartWidget.prototype.constructor = SimpleLineChartWidget;
+
+  SimpleLineChartWidget.prototype.setOrdValue = function (ord) {
+    this.$ord = ord;
+  };
+
+  SimpleLineChartWidget.prototype.setHistoryBql = function (historyBql) {
+    this.$historyBql = historyBql;
+  };
+
+  SimpleLineChartWidget.prototype.setBackgroundColor = function (color) {
+    this.$backgroundColor = color;
+  };
+
+  SimpleLineChartWidget.prototype.setBorderColor = function (color) {
+    this.$borderColor = color;
+  };
+
+  SimpleLineChartWidget.prototype.setBorderThickness = function (thickness) {
+    this.$borderThickness = thickness;
+  };
+
+  SimpleLineChartWidget.prototype.setDateFormat = function (format) {
+    this.$dateFormat = format;
+  };
+
+  SimpleLineChartWidget.prototype.setLegendLocation = function (location) {
+    this.$legendLocation = location;
+  };
+
+  SimpleLineChartWidget.prototype.setLimit = function (limit) {
+    this.$limit = limit;
+  };
+
+  SimpleLineChartWidget.prototype.setOffset = function (offset) {
+    this.$offset = offset;
+  };
+
+  SimpleLineChartWidget.prototype.setRefreshPeriod = function (period) {
+    this.$refreshPeriod = period;
+  };
+
+  SimpleLineChartWidget.prototype.setLineColor = function (color) {
+    this.$lineColor = color;
+  };
+
+  SimpleLineChartWidget.prototype.setPadding = function (padding) {
+    this.$padding = padding;
+  };
+
+  SimpleLineChartWidget.prototype.setTitleFontSize = function (size) {
+    this.$titleFontSize = size;
+  };
+
+  SimpleLineChartWidget.prototype.setTitleFontColor = function (color) {
+    this.$titleFontColor = color;
+  };
+
+  SimpleLineChartWidget.prototype.setTitleFontWeight = function (weight) {
+    this.$titleFontWeight = weight;
+  };
+
+  SimpleLineChartWidget.prototype.setTitleXOffset = function (offset) {
+    this.$titleXOffset = offset;
+  };
+
+  SimpleLineChartWidget.prototype.setTitleYOffset = function (offset) {
+    this.$titleYOffset = offset;
+  };
+
+  SimpleLineChartWidget.prototype.setTitle = function (title) {
+    this.$title = title;
+  };
+
+  function getWidgetSize(widget) {
+    var jq = widget.jq();
+
+    return {
+      width: jq.width(),
+      height: jq.height()
+    };
+  }
+
+  function randomId(length) {
+    var chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    var result = "";
+
+    for (var i = length; i > 0; --i) {
+      result += chars[Math.round(Math.random() * (chars.length - 1))];
     }
-}(_0x5dd3, 0xac585), define('nmodule/simpleLineChart/rc/simpleLineChartWidget', [_0x478486(0x248), 'bajaux/events', _0x478486(0x1c0), _0x478486(0x1ef), _0x478486(0x1d4), _0x478486(0x200), _0x478486(0x259), _0x478486(0x1fa), _0x478486(0x1eb), _0x478486(0x22c), _0x478486(0x201)], function (_0x253f52, _0x4964df, _0x2925b2, _0x121f62, _0x107686, _0x4ccfec, _0x20d102, _0x299ae5, _0x15b3e4) {
-    var _0x56d7a8 = _0x478486;
-    var _0x4af6d3, _0x199ca2 = !![],
-        _0x5b0542 = null,
-        _0x51cd4f = {
-            'defaultBackgroundColor': _0x56d7a8(0x217),
-            'defaultBorderColor': _0x56d7a8(0x243),
-            'defaultBorderThickness': 0x4,
-            'defaultDateFormat': _0x56d7a8(0x228),
-            'defaultTitle': _0x56d7a8(0x1c6),
-            'legendLocation': _0x56d7a8(0x204),
-            'lineColor': '#1f77b4',
-            'limit': 0xa,
-            'offset': 0x0,
-            'padding': _0x56d7a8(0x256),
-            'titleXOffset': 0x32,
-            'titleYOffset': 0x28,
-            'titleFontSize': _0x56d7a8(0x25a),
-            'titleFontColor': '#808080',
-            'titleFontWeight': _0x56d7a8(0x233)
+
+    return result;
+  }
+
+  function checkLicense() {
+    return baja.rpc({
+      typeSpec: "simpleLineChart:SimpleLineChartWidget",
+      method: "checkLicense"
+    });
+  }
+
+  function showLicenseError(dom, error) {
+    dom.html("Your station is not licensed for this widget: " + error.message);
+    console.log("Unlicensed");
+  }
+
+  function renderChart(widget, historyData) {
+    var size = getWidgetSize(widget);
+    var chartValues = historyData.chartValues;
+
+    var yValues = chartValues.yValues
+      ? [chartValues.valueText].concat(chartValues.yValues)
+      : [];
+
+    var xValues = chartValues.xValues
+      ? ["x"].concat(chartValues.xValues)
+      : [];
+
+    historyData.width = size.width || 400;
+    historyData.height = size.height || 400;
+
+    var legendLocation = widget.$legendLocation.split(",");
+
+    historyData.legendx = historyData.width / 2 - parseInt(legendLocation[0]);
+    historyData.legendy = historyData.height - parseInt(legendLocation[1]);
+
+    var padding = widget.$padding.split(",");
+
+    if (widget.$chart !== null) {
+      widget.$chart.load({
+        columns: [xValues, yValues]
+      });
+      return;
+    }
+
+    widget.$chart = c3.generate({
+      bindto: widget.$dom,
+
+      size: {
+        height: historyData.height,
+        width: historyData.width
+      },
+
+      data: {
+        x: "x",
+        columns: [xValues, yValues]
+      },
+
+      axis: {
+        x: {
+          type: "category",
+          tick: {
+            format: function (index) {
+              return dateUtil.formatDate(
+                this.api.categories()[index],
+                widget.$dateFormat,
+                null
+              );
+            }
+          }
+        }
+      },
+
+      color: {
+        pattern: [widget.$lineColor]
+      },
+
+      grid: {
+        x: {
+          show: true
         },
-        _0x227802 = function () {
-            var _0x9b98b = _0x56d7a8,
-                _0x565776 = this;
-            _0x253f52[_0x9b98b(0x234)](this, arguments), _0x565776['properties']()[_0x9b98b(0x247)](_0x9b98b(0x1e3), _0x9b98b(0x217))['add'](_0x9b98b(0x1d9), _0x9b98b(0x243))[_0x9b98b(0x247)](_0x9b98b(0x1e6), 0x4)['add']('dateFormat', 'd/M/yy')[_0x9b98b(0x247)](_0x9b98b(0x1ed), _0x9b98b(0x22e))[_0x9b98b(0x247)](_0x9b98b(0x242), '100,120')[_0x9b98b(0x247)](_0x9b98b(0x214), 0xa)[_0x9b98b(0x247)]('lineColor', '#1f77b4')['add']('offset', 0x0)[_0x9b98b(0x247)](_0x9b98b(0x211), _0x9b98b(0x256))[_0x9b98b(0x247)](_0x9b98b(0x231), 0xea60)[_0x9b98b(0x247)]('titleFontColor', _0x9b98b(0x24f))[_0x9b98b(0x247)]('titleFontWeight', _0x9b98b(0x233))['add'](_0x9b98b(0x1f7), 0x32)['add'](_0x9b98b(0x1dd), 0x28)[_0x9b98b(0x247)](_0x9b98b(0x209), 'Chart 1')[_0x9b98b(0x247)](_0x9b98b(0x1ff), '16px'), _0x2925b2(_0x565776);
-        };
-    _0x227802['prototype'] = Object[_0x56d7a8(0x202)](_0x253f52['prototype']), _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x213)] = _0x227802, _0x227802['prototype']['setOrdValue'] = function (_0xbcfa05) {
-        var _0x1408c4 = _0x56d7a8;
-        this[_0x1408c4(0x1d8)] = _0xbcfa05;
-    }, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x227)] = function (_0x332119) {
-        var _0x511a57 = _0x56d7a8,
-            _0x13d5f3 = this;
-        _0x13d5f3[_0x511a57(0x258)] = _0x332119;
-    }, _0x227802[_0x56d7a8(0x241)]['setBackgroundColor'] = function (_0x51bd04) {
-        var _0x1355f7 = this;
-        _0x1355f7['$backgroundColor'] = _0x51bd04;
-    }, _0x227802['prototype'][_0x56d7a8(0x1da)] = function (_0x5c5d91) {
-        var _0x281943 = _0x56d7a8,
-            _0x42508f = this;
-        _0x42508f[_0x281943(0x250)] = _0x5c5d91;
-    }, _0x227802[_0x56d7a8(0x241)]['setBorderThickness'] = function (_0x265e58) {
-        var _0x496a34 = _0x56d7a8,
-            _0x208ca1 = this;
-        _0x208ca1[_0x496a34(0x1c3)] = _0x265e58;
-    }, _0x227802[_0x56d7a8(0x241)]['setDateFormat'] = function (_0x15461d) {
-        var _0x33357d = this;
-        _0x33357d['$dateFormat'] = _0x15461d;
-    }, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x1d2)] = function (_0x4e96e6) {
-        var _0x2662be = _0x56d7a8,
-            _0x5d9850 = this;
-        _0x5d9850[_0x2662be(0x215)] = _0x4e96e6;
-    }, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x1d7)] = function (_0xb36732) {
-        var _0x3cfd16 = _0x56d7a8,
-            _0x424bda = this;
-        _0x424bda[_0x3cfd16(0x218)] = _0xb36732;
-    }, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x1bc)] = function (_0x179875) {
-        var _0x3144fc = _0x56d7a8,
-            _0x35a3ef = this;
-        _0x35a3ef[_0x3144fc(0x236)] = _0x179875;
-    }, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x20f)] = function (_0x2b0987) {
-        this['$refreshPeriod'] = _0x2b0987;
-    }, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x216)] = function (_0x3ad6a4) {
-        var _0x468529 = _0x56d7a8,
-            _0x5b2f90 = this;
-        _0x5b2f90[_0x468529(0x1df)] = _0x3ad6a4;
-    }, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x1f1)] = function (_0x5056f8) {
-        var _0x47a2a4 = this;
-        _0x47a2a4['$padding'] = _0x5056f8;
-    }, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x1ee)] = function (_0x5ed9d2) {
-        var _0x5dfcd6 = _0x56d7a8,
-            _0x3d34c1 = this;
-        _0x3d34c1[_0x5dfcd6(0x1d3)] = _0x5ed9d2;
-    }, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x240)] = function (_0x4c2fb1) {
-        var _0x5b0513 = _0x56d7a8,
-            _0x47f0a5 = this;
-        _0x47f0a5[_0x5b0513(0x1f4)] = _0x4c2fb1;
-    }, _0x227802['prototype'][_0x56d7a8(0x22b)] = function (_0x41c353) {
-        var _0x367f81 = this;
-        _0x367f81['$titleFontWeight'] = _0x41c353;
-    }, _0x227802['prototype'][_0x56d7a8(0x225)] = function (_0x557767) {
-        var _0x1b44bf = _0x56d7a8,
-            _0x1723e9 = this;
-        _0x1723e9[_0x1b44bf(0x229)] = _0x557767;
-    }, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x226)] = function (_0x4e3681) {
-        var _0x1ba821 = this;
-        _0x1ba821['$titleYOffset'] = _0x4e3681;
-    }, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x1cd)] = function (_0x22f348) {
-        var _0x42b38b = _0x56d7a8,
-            _0x4e6743 = this;
-        _0x4e6743[_0x42b38b(0x246)] = _0x22f348;
-    };
-
-    function _0x1e1b6f(_0x187a73) {
-        var _0x3c8519 = _0x56d7a8,
-            _0x14587c = _0x187a73['jq']();
-        return {
-            'width': _0x14587c[_0x3c8519(0x1c2)](),
-            'height': _0x14587c['height']()
-        };
-    }
-
-    function _0xa5618d(_0x39f733) {
-        var _0x45a86b = _0x56d7a8,
-            _0x1193e5 = _0x45a86b(0x1bd),
-            _0x1c34fa = '';
-        for (var _0x4d2d14 = _0x39f733; _0x4d2d14 > 0x0; --_0x4d2d14) {
-            _0x1c34fa += _0x1193e5[Math[_0x45a86b(0x224)](Math['random']() * (_0x1193e5[_0x45a86b(0x1f3)] - 0x1))];
+        y: {
+          show: true
         }
-        return _0x1c34fa;
-    }
+      },
 
-    function _0x585d92() {
-        var _0x213130 = _0x56d7a8;
-        return _0x20d102['rpc']({
-            'typeSpec': _0x213130(0x1d5),
-            'method': 'checkLicense'
-        });
-    }
+      tooltip: {},
 
-    function _0x19c6f0(_0x313426, _0x2d1f07) {
-        var _0x1727d8 = _0x56d7a8;
-        _0x313426['html'](_0x1727d8(0x1e7) + _0x2d1f07['message']), console[_0x1727d8(0x1b9)](_0x1727d8(0x20b));
-    }
+      padding: {
+        top: parseInt(padding[0]),
+        right: parseInt(padding[1]),
+        bottom: parseInt(padding[2]),
+        left: parseInt(padding[3])
+      },
 
-    function _0x1bae40(_0x53ad82, _0x1982f8) {
-        var _0x370a36 = _0x56d7a8,
-            _0x3d8c3e = [_0x1982f8],
-            _0x2390dc = _0x1e1b6f(_0x53ad82),
-            _0x15ff73, _0x3ec69a, _0x59f865 = _0x1982f8[_0x370a36(0x22d)];
-        _0x3ec69a = _0x59f865[_0x370a36(0x1ec)] ? [_0x59f865[_0x370a36(0x235)]][_0x370a36(0x208)](_0x59f865[_0x370a36(0x1ec)]) : [], _0x15ff73 = _0x59f865[_0x370a36(0x1db)] ? ['x'][_0x370a36(0x208)](_0x59f865['xValues']) : [], _0x1982f8['width'] = _0x2390dc[_0x370a36(0x1c2)] || 0x190, _0x1982f8['height'] = _0x2390dc[_0x370a36(0x1e2)] || 0x190;
-        var _0x1b8a85 = _0x53ad82[_0x370a36(0x215)]['split'](',');
-        _0x1982f8[_0x370a36(0x1e9)] = _0x1982f8[_0x370a36(0x1c2)] / 0x2 - parseInt(_0x1b8a85[0x0]), _0x1982f8[_0x370a36(0x23a)] = _0x1982f8['height'] - parseInt(_0x1b8a85[0x1]);
-        var _0x509cd0 = _0x53ad82[_0x370a36(0x219)][_0x370a36(0x249)](',');
-        (function _0x1e710d() {
-            var _0x25663c = _0x370a36;
-            if (_0x53ad82['$chart'] !== null) {
-                _0x53ad82['$chart']['load']({
-                    'columns': [_0x15ff73, _0x3ec69a]
-                });
-                return;
-            }
-            _0x53ad82[_0x25663c(0x24e)] = _0x107686[_0x25663c(0x23c)]({
-                'bindto': _0x53ad82['$dom'],
-                'size': {
-                    'height': _0x1982f8[_0x25663c(0x1e2)],
-                    'width': _0x1982f8[_0x25663c(0x1c2)]
-                },
-                'data': {
-                    'x': 'x',
-                    'columns': [_0x15ff73, _0x3ec69a]
-                },
-                'axis': {
-                    'x': {
-                        'type': _0x25663c(0x20d),
-                        'tick': {
-                            'format': function (_0x4721c7) {
-                                var _0x5346aa = _0x25663c;
-                                return _0x15b3e4[_0x5346aa(0x1e1)](this[_0x5346aa(0x24c)][_0x5346aa(0x1f2)]()[_0x4721c7], _0x53ad82[_0x5346aa(0x1cb)], null);
-                            }
-                        }
-                    }
-                },
-                'color': {
-                    'pattern': [_0x53ad82[_0x25663c(0x1df)]]
-                },
-                'grid': {
-                    'x': {
-                        'show': !![]
-                    },
-                    'y': {
-                        'show': !![]
-                    }
-                },
-                'tooltip': {},
-                'padding': {
-                    'top': parseInt(_0x509cd0[0x0]),
-                    'right': parseInt(_0x509cd0[0x1]),
-                    'bottom': parseInt(_0x509cd0[0x2]),
-                    'left': parseInt(_0x509cd0[0x3])
-                },
-                'transition': {
-                    'duration': 0x2ee
-                },
-                'legend': {
-                    'show': !![],
-                    'position': _0x25663c(0x1de),
-                    'inset': {
-                        'anchor': _0x25663c(0x230),
-                        'x': _0x1982f8[_0x25663c(0x1e9)],
-                        'y': _0x1982f8[_0x25663c(0x23a)],
-                        'step': 0x1
-                    }
-                }
-            }), _0x121f62['select'](_0x25663c(0x1fc))[_0x25663c(0x223)](_0x25663c(0x21f))['attr']('x', 0x0)[_0x25663c(0x1ba)]('y', 0x0)[_0x25663c(0x1ba)]('width', '100%')[_0x25663c(0x1ba)](_0x25663c(0x1e2), _0x25663c(0x1dc))[_0x25663c(0x1ba)](_0x25663c(0x20c), 'none')[_0x25663c(0x1ba)]('stroke-width', _0x53ad82[_0x25663c(0x1c3)])[_0x25663c(0x1ba)](_0x25663c(0x222), _0x53ad82[_0x25663c(0x250)]), _0x121f62[_0x25663c(0x212)](_0x25663c(0x1fc))[_0x25663c(0x223)](_0x25663c(0x22f))['attr']('x', _0x53ad82[_0x25663c(0x229)])[_0x25663c(0x1ba)]('y', _0x53ad82[_0x25663c(0x23d)])[_0x25663c(0x23f)](_0x25663c(0x20e), _0x25663c(0x1e0))['style'](_0x25663c(0x25b), _0x53ad82[_0x25663c(0x1d3)])[_0x25663c(0x23f)](_0x25663c(0x238), _0x53ad82[_0x25663c(0x207)])[_0x25663c(0x22f)](_0x53ad82[_0x25663c(0x246)])['style'](_0x25663c(0x20c), _0x53ad82['$titleFontColor']), _0x4ccfec(_0x25663c(0x255))[_0x25663c(0x1f6)](_0x25663c(0x21b), _0x53ad82['$backgroundColor']);
-        }());
-    }
+      transition: {
+        duration: 750
+      },
 
-    function _0x4b842c(_0x2e2890) {
-        var _0x86394d = _0x56d7a8;
-        if (_0x237be1() === ![]) {
-            while (dom[_0x86394d(0x1fe)]) {
-                dom[_0x86394d(0x1ce)](dom[_0x86394d(0x1fe)]);
-            }
-            console[_0x86394d(0x1b9)]('License Exception');
-            return;
+      legend: {
+        show: true,
+        position: "inset",
+        inset: {
+          anchor: "top-right",
+          x: historyData.legendx,
+          y: historyData.legendy,
+          step: 1
         }
-        _0x299ae5[_0x86394d(0x24b)](_0x2e2890)[_0x86394d(0x1c1)](function (_0x3fe180) {
-            _0x1bae40(_0x2e2890, _0x3fe180);
-        });
+      }
+    });
+
+    d3.select("svg")
+      .append("rect")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("width", "100%")
+      .attr("height", "100%")
+      .attr("fill", "none")
+      .attr("stroke-width", widget.$borderThickness)
+      .attr("stroke", widget.$borderColor);
+
+    d3.select("svg")
+      .append("text")
+      .attr("x", widget.$titleXOffset)
+      .attr("y", widget.$titleYOffset)
+      .style("text-anchor", "middle")
+      .style("font-size", widget.$titleFontSize)
+      .style("font-weight", widget.$titleFontWeight)
+      .text(widget.$title)
+      .style("fill", widget.$titleFontColor);
+
+    $(".SimpleLineChartWidgetOuter").css(
+      "background-color",
+      widget.$backgroundColor
+    );
+  }
+
+  function refreshChart(widget) {
+    if (isLicensed === false) {
+      console.log("License Exception");
+      return;
     }
 
-    function _0x237be1() {
-        return _0x199ca2;
-    }
-    return _0x227802[_0x56d7a8(0x241)]['doInitialize'] = function (_0x2a4cb0) {
-        var _0x2226dc = _0x56d7a8;
-        _0x2a4cb0[_0x2226dc(0x1f6)](_0x2226dc(0x257), _0x2226dc(0x1f8)), window['d3'] = _0x121f62;
-        var _0x2535ec = this,
-            _0x2a8b06 = _0x2535ec['jq']();
-        _0x2a4cb0[_0x2226dc(0x253)](_0x2226dc(0x1d1)), _0x2535ec[_0x2226dc(0x21c)] = _0x2a4cb0[0x0], _0x2535ec[_0x2226dc(0x24e)] = null, _0x585d92()[_0x2226dc(0x1c1)](function (_0x277f5c) {})[_0x2226dc(0x23b)](function (_0x29c879) {
-            _0x19c6f0(_0x2535ec['jq'](), _0x29c879), _0x199ca2 = ![];
-            return;
-        }), _0x2a8b06[_0x2226dc(0x22a)]()['parent']() && (_0x2a8b06['parent']()[_0x2226dc(0x22a)]()[0x0]['id'] = _0xa5618d(0x8), _0x2a8b06[_0x2226dc(0x22a)]()[0x0][_0x2226dc(0x23f)] && (_0x2a8b06[_0x2226dc(0x22a)]()[0x0][_0x2226dc(0x23f)][_0x2226dc(0x257)] = _0x2226dc(0x1f8))), _0x2535ec['$backgroundColor'] = _0x2535ec[_0x2226dc(0x210)] ? _0x2535ec[_0x2226dc(0x210)] : _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x1e3)) ? _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x1e3)) : _0x51cd4f[_0x2226dc(0x251)], _0x2535ec[_0x2226dc(0x250)] = _0x2535ec[_0x2226dc(0x250)] ? _0x2535ec[_0x2226dc(0x250)] : _0x2535ec[_0x2226dc(0x1be)]()['getValue'](_0x2226dc(0x1d9)) ? _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x1d9)) : _0x51cd4f[_0x2226dc(0x245)], _0x2535ec[_0x2226dc(0x1c3)] = _0x2535ec['$borderThickness'] ? _0x2535ec[_0x2226dc(0x1c3)] : _0x2535ec['properties']()[_0x2226dc(0x1ea)]('borderThickness') ? _0x2535ec['properties']()[_0x2226dc(0x1ea)]('borderThickness') : _0x51cd4f[_0x2226dc(0x21a)], _0x2535ec[_0x2226dc(0x1cb)] = _0x2535ec['$dateFormat'] ? _0x2535ec[_0x2226dc(0x1cb)] : _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x237)) ? _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x237)) : _0x51cd4f[_0x2226dc(0x24a)], _0x2535ec[_0x2226dc(0x215)] = _0x2535ec['$legendLocation'] ? _0x2535ec['$legendLocation'] : _0x2535ec['properties']()['getValue'](_0x2226dc(0x242)) ? _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x242)) : _0x51cd4f[_0x2226dc(0x242)], _0x2535ec['$lineColor'] = _0x2535ec['$lineColor'] ? _0x2535ec[_0x2226dc(0x1df)] : _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x1d0)) ? _0x2535ec[_0x2226dc(0x1be)]()['getValue']('lineColor') : _0x51cd4f[_0x2226dc(0x1d0)], _0x2535ec[_0x2226dc(0x219)] = _0x2535ec['$padding'] ? _0x2535ec[_0x2226dc(0x219)] : _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x211)) ? _0x2535ec['properties']()['getValue'](_0x2226dc(0x211)) : _0x51cd4f['padding'], _0x2535ec['$refreshInterval'] = _0x2535ec[_0x2226dc(0x23e)] ? _0x2535ec[_0x2226dc(0x23e)] : _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)]('refreshInterval') ? _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)]('refreshInterval') : 0xea60, _0x2535ec['$titleFontSize'] = _0x2535ec[_0x2226dc(0x1d3)] ? _0x2535ec['$titleFontSize'] : _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x1ff)) ? _0x2535ec['properties']()[_0x2226dc(0x1ea)](_0x2226dc(0x1ff)) : _0x51cd4f[_0x2226dc(0x1ff)], _0x2535ec[_0x2226dc(0x1f4)] = _0x2535ec[_0x2226dc(0x1f4)] ? _0x2535ec[_0x2226dc(0x1f4)] : _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x1c4)) ? _0x2535ec[_0x2226dc(0x1be)]()['getValue']('titleFontColor') : _0x51cd4f[_0x2226dc(0x1c4)], _0x2535ec[_0x2226dc(0x207)] = _0x2535ec['$titleFontWeight'] ? _0x2535ec[_0x2226dc(0x207)] : _0x2535ec[_0x2226dc(0x1be)]()['getValue'](_0x2226dc(0x205)) ? _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x205)) : _0x51cd4f[_0x2226dc(0x205)], _0x2535ec[_0x2226dc(0x229)] = _0x2535ec['$titleXOffset'] ? _0x2535ec[_0x2226dc(0x229)] : _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)]('titleXOffset') ? _0x2535ec['properties']()[_0x2226dc(0x1ea)](_0x2226dc(0x1f7)) : _0x51cd4f[_0x2226dc(0x1f7)], _0x2535ec[_0x2226dc(0x23d)] = _0x2535ec['$titleYOffset'] ? _0x2535ec['$titleYOffset'] : _0x2535ec['properties']()[_0x2226dc(0x1ea)](_0x2226dc(0x1dd)) ? _0x2535ec['properties']()[_0x2226dc(0x1ea)](_0x2226dc(0x1dd)) : _0x51cd4f[_0x2226dc(0x1dd)], _0x2535ec[_0x2226dc(0x246)] = _0x2535ec['$title'] ? _0x2535ec[_0x2226dc(0x246)] : _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x209)) ? _0x2535ec['properties']()['getValue']('title') : _0x51cd4f[_0x2226dc(0x24d)], _0x2535ec[_0x2226dc(0x258)] = _0x2535ec[_0x2226dc(0x258)] ? _0x2535ec[_0x2226dc(0x258)] : _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x1ed)) ? _0x2535ec['properties']()[_0x2226dc(0x1ea)](_0x2226dc(0x1ed)) : '', _0x2535ec['$limit'] = _0x2535ec[_0x2226dc(0x218)] ? _0x2535ec[_0x2226dc(0x218)] : _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)]('limit') ? _0x2535ec['properties']()[_0x2226dc(0x1ea)]('limit') : _0x51cd4f[_0x2226dc(0x214)], _0x2535ec[_0x2226dc(0x236)] = _0x2535ec[_0x2226dc(0x236)] ? _0x2535ec[_0x2226dc(0x236)] : _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x1e4)) ? _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x1e4)) : _0x51cd4f[_0x2226dc(0x1e4)], _0x5b0542 = setInterval(function () {
-            _0x4b842c(_0x2535ec);
-        }, _0x2535ec['$refreshInterval']);
-    }, _0x227802[_0x56d7a8(0x241)]['doLayout'] = function () {}, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x244)] = function (_0x560c45, _0x2810b8) {
-        _0x4b842c(this);
-    }, _0x227802[_0x56d7a8(0x241)]['doDestroy'] = function () {
-        this['jq']()['removeClass']('SimpleLineChartWidgetOuter'), _0x5b0542 && clearInterval(_0x5b0542);
-    }, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x203)] = function () {
-        var _0x524a05 = _0x56d7a8,
-            _0x1f193e = this;
-        if (_0x1f193e[_0x524a05(0x254)]()[_0x524a05(0x1c5)]) {
-            var _0x526743 = _0x1f193e[_0x524a05(0x254)]()[_0x524a05(0x1c5)][_0x524a05(0x21e)]['o'];
-            _0x1f193e[_0x524a05(0x1f0)] = _0x526743[_0x524a05(0x1cc)]('history:', ''), _0x4b842c(_0x1f193e);
-        } else {
-            var _0x173eec = _0x1f193e['value']() ? _0x1f193e[_0x524a05(0x254)]()[_0x524a05(0x1fb)]()[_0x524a05(0x1e8)]()[_0x524a05(0x1c8)]() : _0x1f193e[_0x524a05(0x1d8)];
-            _0x20d102[_0x524a05(0x20a)][_0x524a05(0x1f9)](_0x173eec)[_0x524a05(0x1bf)]({
-                'lease': !![]
-            })[_0x524a05(0x1c1)](function (_0x53875f) {
-                var _0x1b1c8c = _0x524a05;
-                _0x53875f['getSlots']()['is']('history:NumericIntervalHistoryExt')[_0x1b1c8c(0x221)](function (_0xfa0212) {
-                    var _0x529874 = _0x1b1c8c,
-                        _0x241175 = _0x53875f[_0x529874(0x1bf)](_0xfa0212),
-                        _0x322069 = _0x241175['getNavOrd']()[_0x529874(0x1c8)]();
-                    _0x20d102[_0x529874(0x20a)][_0x529874(0x1f9)](_0x322069)[_0x529874(0x1f5)]({
-                        'lease': !![]
-                    })[_0x529874(0x1c1)](function (_0x9c44b8) {
-                        var _0x2a26dc = _0x529874,
-                            _0x3d84fb = _0x9c44b8[_0x2a26dc(0x1fd)]()[_0x2a26dc(0x1c7)]()[_0x2a26dc(0x1fb)]()['toString']();
-                        _0x20d102['Ord'][_0x2a26dc(0x1f9)](_0x3d84fb)[_0x2a26dc(0x1f5)]({
-                            'lease': !![]
-                        })[_0x2a26dc(0x1c1)](function (_0x27a108) {
-                            var _0x55c931 = _0x2a26dc;
-                            _0x1f193e[_0x55c931(0x1f0)] = _0x27a108[_0x55c931(0x1fd)]()['getId']()[_0x55c931(0x1c8)](), _0x4b842c(_0x1f193e);
-                        })['catch'](function (_0x3bc589) {
-                            var _0x4a3f89 = _0x2a26dc;
-                            _0x20d102[_0x4a3f89(0x1bb)]('ORD Error getting history historyConfigOrd: ' + _0x3bc589);
-                        });
-                    })[_0x529874(0x23b)](function (_0x125afb) {
-                        var _0x27b186 = _0x529874;
-                        _0x20d102[_0x27b186(0x1bb)](_0x27b186(0x21d) + _0x125afb);
-                    });
-                });
-            })[_0x524a05(0x23b)](function (_0x421b4c) {
-                var _0x28bb92 = _0x524a05;
-                _0x20d102[_0x28bb92(0x1bb)](_0x28bb92(0x1e5) + _0x421b4c);
-            });
-        }
-    }, _0x227802;
-}));
+    modelHistory.resolveData(widget).then(function (historyData) {
+      renderChart(widget, historyData);
+    });
+  }
 
-function _0x5dd3() {
-    var _0x420591 = ['getComponent', 'firstChild', 'titleFontSize', 'jquery', 'css!nmodule/simpleLineChart/rc/simpleLineChartWidget', 'create', 'doLoad', '100,120', 'titleFontWeight', '814588AMaNrL', '$titleFontWeight', 'concat', 'title', 'Ord', 'Unlicensed', 'fill', 'category', 'text-anchor', 'setRefreshPeriod', '$backgroundColor', 'padding', 'select', 'constructor', 'limit', '$legendLocation', 'setLineColor', '#3D3D3D', '$limit', '$padding', 'defaultBorderThickness', 'background-color', '$dom', 'ORD Error getting history ext component: ', 'req', 'rect', '14XaXWGw', 'each', 'stroke', 'append', 'round', 'setTitleXOffset', 'setTitleYOffset', 'setHistoryBql', 'd/M/yy', '$titleXOffset', 'parent', 'setTitleFontWeight', 'css!nmodule/simpleLineChart/rc/c3/c3.min', 'chartValues', '|bql:select timestamp, value order by timestamp DESC', 'text', 'top-right', 'refreshInterval', '776CWsONN', 'bold', 'apply', 'valueText', '$offset', 'dateFormat', 'font-weight', '1937814pfzLqG', 'legendy', 'catch', 'generate', '$titleYOffset', '$refreshInterval', 'style', 'setTitleFontColor', 'prototype', 'legendLocation', '#727272', 'doChanged', 'defaultBorderColor', '$title', 'add', 'bajaux/Widget', 'split', 'defaultDateFormat', 'resolveData', 'api', 'defaultTitle', '$chart', '#fff', '$borderColor', 'defaultBackgroundColor', '4809228uRFmox', 'addClass', 'value', '.SimpleLineChartWidgetOuter', '60,80,60,80', 'overflow', '$historyBql', 'baja!', '16px', 'font-size', 'log', 'attr', 'error', 'setOffset', '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 'properties', 'get', 'bajaux/mixin/subscriberMixIn', 'then', 'width', '$borderThickness', 'titleFontColor', '$tableData', 'Chart 1', 'getHistoryConfig', 'toString', '1067826WGvbEz', '288621nNQoUa', '$dateFormat', 'replace', 'setTitle', 'removeChild', '1311184jpTkjD', 'lineColor', 'SimpleLineChartWidgetOuter', 'setLegendLocation', '$titleFontSize', 'nmodule/simpleLineChart/rc/c3/c3.min', 'simpleLineChart:SimpleLineChartWidget', '3767345zqRfmf', 'setLimit', '$ord', 'borderColor', 'setBorderColor', 'xValues', '100%', 'titleYOffset', 'inset', '$lineColor', 'middle', 'formatDate', 'height', 'backgroundColor', 'offset', 'ORD Error getting component: ', 'borderThickness', 'Your station is not licensed for this widget: ', 'relativizeToSession', 'legendx', 'getValue', 'nmodule/simpleLineChart/rc/dateUtil', 'yValues', 'historyBql', 'setTitleFontSize', 'nmodule/simpleLineChart/rc/d3/d3.v3.min', '$historyId', 'setPadding', 'categories', 'length', '$titleFontColor', 'resolve', 'css', 'titleXOffset', 'hidden', 'make', 'nmodule/simpleLineChart/rc/modelHistory', 'getNavOrd', 'svg'];
-    _0x5dd3 = function () {
-        return _0x420591;
-    };
-    return _0x5dd3();
-};
-var _0x478486 = _0x1986;
+  SimpleLineChartWidget.prototype.doInitialize = function (dom) {
+    dom.css("overflow", "hidden");
+    window.d3 = d3;
 
-function _0x1986(_0x4dce8d, _0x162116) {
-    var _0x5dd31d = _0x5dd3();
-    return _0x1986 = function (_0x198665, _0x385e6b) {
-        _0x198665 = _0x198665 - 0x1b9;
-        var _0x1c14db = _0x5dd31d[_0x198665];
-        return _0x1c14db;
-    }, _0x1986(_0x4dce8d, _0x162116);
-}(function (_0x1fb9df, _0x1e7a3f) {
-    var _0x3f96f0 = _0x1986,
-        _0x5e7c5d = _0x1fb9df();
-    while (!![]) {
-        try {
-            var _0x5ccb1c = -parseInt(_0x3f96f0(0x206)) / 0x1 + parseInt(_0x3f96f0(0x1cf)) / 0x2 + -parseInt(_0x3f96f0(0x239)) / 0x3 + -parseInt(_0x3f96f0(0x252)) / 0x4 + -parseInt(_0x3f96f0(0x1d6)) / 0x5 + -parseInt(_0x3f96f0(0x1c9)) / 0x6 * (-parseInt(_0x3f96f0(0x220)) / 0x7) + -parseInt(_0x3f96f0(0x232)) / 0x8 * (-parseInt(_0x3f96f0(0x1ca)) / 0x9);
-            if (_0x5ccb1c === _0x1e7a3f) break;
-            else _0x5e7c5d['push'](_0x5e7c5d['shift']());
-        } catch (_0x559635) {
-            _0x5e7c5d['push'](_0x5e7c5d['shift']());
-        }
-    }
-}(_0x5dd3, 0xac585), define('nmodule/simpleLineChart/rc/SimpleLineChartWidget', [_0x478486(0x248), 'bajaux/events', _0x478486(0x1c0), _0x478486(0x1ef), _0x478486(0x1d4), _0x478486(0x200), _0x478486(0x259), _0x478486(0x1fa), _0x478486(0x1eb), _0x478486(0x22c), _0x478486(0x201)], function (_0x253f52, _0x4964df, _0x2925b2, _0x121f62, _0x107686, _0x4ccfec, _0x20d102, _0x299ae5, _0x15b3e4) {
-    var _0x56d7a8 = _0x478486;
-    var _0x4af6d3, _0x199ca2 = !![],
-        _0x5b0542 = null,
-        _0x51cd4f = {
-            'defaultBackgroundColor': _0x56d7a8(0x217),
-            'defaultBorderColor': _0x56d7a8(0x243),
-            'defaultBorderThickness': 0x4,
-            'defaultDateFormat': _0x56d7a8(0x228),
-            'defaultTitle': _0x56d7a8(0x1c6),
-            'legendLocation': _0x56d7a8(0x204),
-            'lineColor': '#1f77b4',
-            'limit': 0xa,
-            'offset': 0x0,
-            'padding': _0x56d7a8(0x256),
-            'titleXOffset': 0x32,
-            'titleYOffset': 0x28,
-            'titleFontSize': _0x56d7a8(0x25a),
-            'titleFontColor': '#808080',
-            'titleFontWeight': _0x56d7a8(0x233)
-        },
-        _0x227802 = function () {
-            var _0x9b98b = _0x56d7a8,
-                _0x565776 = this;
-            _0x253f52[_0x9b98b(0x234)](this, arguments), _0x565776['properties']()[_0x9b98b(0x247)](_0x9b98b(0x1e3), _0x9b98b(0x217))['add'](_0x9b98b(0x1d9), _0x9b98b(0x243))[_0x9b98b(0x247)](_0x9b98b(0x1e6), 0x4)['add']('dateFormat', 'd/M/yy')[_0x9b98b(0x247)](_0x9b98b(0x1ed), _0x9b98b(0x22e))[_0x9b98b(0x247)](_0x9b98b(0x242), '100,120')[_0x9b98b(0x247)](_0x9b98b(0x214), 0xa)[_0x9b98b(0x247)]('lineColor', '#1f77b4')['add']('offset', 0x0)[_0x9b98b(0x247)](_0x9b98b(0x211), _0x9b98b(0x256))[_0x9b98b(0x247)](_0x9b98b(0x231), 0xea60)[_0x9b98b(0x247)]('titleFontColor', _0x9b98b(0x24f))[_0x9b98b(0x247)]('titleFontWeight', _0x9b98b(0x233))['add'](_0x9b98b(0x1f7), 0x32)['add'](_0x9b98b(0x1dd), 0x28)[_0x9b98b(0x247)](_0x9b98b(0x209), 'Chart 1')[_0x9b98b(0x247)](_0x9b98b(0x1ff), '16px'), _0x2925b2(_0x565776);
-        };
-    _0x227802['prototype'] = Object[_0x56d7a8(0x202)](_0x253f52['prototype']), _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x213)] = _0x227802, _0x227802['prototype']['setOrdValue'] = function (_0xbcfa05) {
-        var _0x1408c4 = _0x56d7a8;
-        this[_0x1408c4(0x1d8)] = _0xbcfa05;
-    }, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x227)] = function (_0x332119) {
-        var _0x511a57 = _0x56d7a8,
-            _0x13d5f3 = this;
-        _0x13d5f3[_0x511a57(0x258)] = _0x332119;
-    }, _0x227802[_0x56d7a8(0x241)]['setBackgroundColor'] = function (_0x51bd04) {
-        var _0x1355f7 = this;
-        _0x1355f7['$backgroundColor'] = _0x51bd04;
-    }, _0x227802['prototype'][_0x56d7a8(0x1da)] = function (_0x5c5d91) {
-        var _0x281943 = _0x56d7a8,
-            _0x42508f = this;
-        _0x42508f[_0x281943(0x250)] = _0x5c5d91;
-    }, _0x227802[_0x56d7a8(0x241)]['setBorderThickness'] = function (_0x265e58) {
-        var _0x496a34 = _0x56d7a8,
-            _0x208ca1 = this;
-        _0x208ca1[_0x496a34(0x1c3)] = _0x265e58;
-    }, _0x227802[_0x56d7a8(0x241)]['setDateFormat'] = function (_0x15461d) {
-        var _0x33357d = this;
-        _0x33357d['$dateFormat'] = _0x15461d;
-    }, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x1d2)] = function (_0x4e96e6) {
-        var _0x2662be = _0x56d7a8,
-            _0x5d9850 = this;
-        _0x5d9850[_0x2662be(0x215)] = _0x4e96e6;
-    }, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x1d7)] = function (_0xb36732) {
-        var _0x3cfd16 = _0x56d7a8,
-            _0x424bda = this;
-        _0x424bda[_0x3cfd16(0x218)] = _0xb36732;
-    }, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x1bc)] = function (_0x179875) {
-        var _0x3144fc = _0x56d7a8,
-            _0x35a3ef = this;
-        _0x35a3ef[_0x3144fc(0x236)] = _0x179875;
-    }, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x20f)] = function (_0x2b0987) {
-        this['$refreshPeriod'] = _0x2b0987;
-    }, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x216)] = function (_0x3ad6a4) {
-        var _0x468529 = _0x56d7a8,
-            _0x5b2f90 = this;
-        _0x5b2f90[_0x468529(0x1df)] = _0x3ad6a4;
-    }, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x1f1)] = function (_0x5056f8) {
-        var _0x47a2a4 = this;
-        _0x47a2a4['$padding'] = _0x5056f8;
-    }, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x1ee)] = function (_0x5ed9d2) {
-        var _0x5dfcd6 = _0x56d7a8,
-            _0x3d34c1 = this;
-        _0x3d34c1[_0x5dfcd6(0x1d3)] = _0x5ed9d2;
-    }, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x240)] = function (_0x4c2fb1) {
-        var _0x5b0513 = _0x56d7a8,
-            _0x47f0a5 = this;
-        _0x47f0a5[_0x5b0513(0x1f4)] = _0x4c2fb1;
-    }, _0x227802['prototype'][_0x56d7a8(0x22b)] = function (_0x41c353) {
-        var _0x367f81 = this;
-        _0x367f81['$titleFontWeight'] = _0x41c353;
-    }, _0x227802['prototype'][_0x56d7a8(0x225)] = function (_0x557767) {
-        var _0x1b44bf = _0x56d7a8,
-            _0x1723e9 = this;
-        _0x1723e9[_0x1b44bf(0x229)] = _0x557767;
-    }, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x226)] = function (_0x4e3681) {
-        var _0x1ba821 = this;
-        _0x1ba821['$titleYOffset'] = _0x4e3681;
-    }, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x1cd)] = function (_0x22f348) {
-        var _0x42b38b = _0x56d7a8,
-            _0x4e6743 = this;
-        _0x4e6743[_0x42b38b(0x246)] = _0x22f348;
-    };
+    var widget = this;
+    var jq = widget.jq();
 
-    function _0x1e1b6f(_0x187a73) {
-        var _0x3c8519 = _0x56d7a8,
-            _0x14587c = _0x187a73['jq']();
-        return {
-            'width': _0x14587c[_0x3c8519(0x1c2)](),
-            'height': _0x14587c['height']()
-        };
+    dom.addClass("SimpleLineChartWidgetOuter");
+
+    widget.$dom = dom[0];
+    widget.$chart = null;
+
+    checkLicense()
+      .then(function () {})
+      .catch(function (error) {
+        showLicenseError(widget.jq(), error);
+        isLicensed = false;
+      });
+
+    if (jq.parent().parent()) {
+      jq.parent().parent()[0].id = randomId(8);
+
+      if (jq.parent()[0].style) {
+        jq.parent()[0].style.overflow = "hidden";
+      }
     }
 
-    function _0xa5618d(_0x39f733) {
-        var _0x45a86b = _0x56d7a8,
-            _0x1193e5 = _0x45a86b(0x1bd),
-            _0x1c34fa = '';
-        for (var _0x4d2d14 = _0x39f733; _0x4d2d14 > 0x0; --_0x4d2d14) {
-            _0x1c34fa += _0x1193e5[Math[_0x45a86b(0x224)](Math['random']() * (_0x1193e5[_0x45a86b(0x1f3)] - 0x1))];
-        }
-        return _0x1c34fa;
+    widget.$backgroundColor =
+      widget.$backgroundColor ||
+      widget.properties().getValue("backgroundColor") ||
+      DEFAULTS.defaultBackgroundColor;
+
+    widget.$borderColor =
+      widget.$borderColor ||
+      widget.properties().getValue("borderColor") ||
+      DEFAULTS.defaultBorderColor;
+
+    widget.$borderThickness =
+      widget.$borderThickness ||
+      widget.properties().getValue("borderThickness") ||
+      DEFAULTS.defaultBorderThickness;
+
+    widget.$dateFormat =
+      widget.$dateFormat ||
+      widget.properties().getValue("dateFormat") ||
+      DEFAULTS.defaultDateFormat;
+
+    widget.$legendLocation =
+      widget.$legendLocation ||
+      widget.properties().getValue("legendLocation") ||
+      DEFAULTS.legendLocation;
+
+    widget.$lineColor =
+      widget.$lineColor ||
+      widget.properties().getValue("lineColor") ||
+      DEFAULTS.lineColor;
+
+    widget.$padding =
+      widget.$padding ||
+      widget.properties().getValue("padding") ||
+      DEFAULTS.padding;
+
+    widget.$refreshInterval =
+      widget.$refreshInterval ||
+      widget.properties().getValue("refreshInterval") ||
+      60000;
+
+    widget.$titleFontSize =
+      widget.$titleFontSize ||
+      widget.properties().getValue("titleFontSize") ||
+      DEFAULTS.titleFontSize;
+
+    widget.$titleFontColor =
+      widget.$titleFontColor ||
+      widget.properties().getValue("titleFontColor") ||
+      DEFAULTS.titleFontColor;
+
+    widget.$titleFontWeight =
+      widget.$titleFontWeight ||
+      widget.properties().getValue("titleFontWeight") ||
+      DEFAULTS.titleFontWeight;
+
+    widget.$titleXOffset =
+      widget.$titleXOffset ||
+      widget.properties().getValue("titleXOffset") ||
+      DEFAULTS.titleXOffset;
+
+    widget.$titleYOffset =
+      widget.$titleYOffset ||
+      widget.properties().getValue("titleYOffset") ||
+      DEFAULTS.titleYOffset;
+
+    widget.$title =
+      widget.$title ||
+      widget.properties().getValue("title") ||
+      DEFAULTS.defaultTitle;
+
+    widget.$historyBql =
+      widget.$historyBql ||
+      widget.properties().getValue("historyBql") ||
+      "";
+
+    widget.$limit =
+      widget.$limit ||
+      widget.properties().getValue("limit") ||
+      DEFAULTS.limit;
+
+    widget.$offset =
+      widget.$offset ||
+      widget.properties().getValue("offset") ||
+      DEFAULTS.offset;
+
+    refreshTimer = setInterval(function () {
+      refreshChart(widget);
+    }, widget.$refreshInterval);
+  };
+
+  SimpleLineChartWidget.prototype.doLayout = function () {};
+
+  SimpleLineChartWidget.prototype.doChanged = function () {
+    refreshChart(this);
+  };
+
+  SimpleLineChartWidget.prototype.doDestroy = function () {
+    this.jq().removeClass("SimpleLineChartWidgetOuter");
+
+    if (refreshTimer) {
+      clearInterval(refreshTimer);
+    }
+  };
+
+  SimpleLineChartWidget.prototype.doLoad = function () {
+    var widget = this;
+
+    if (widget.value().$tableData) {
+      var historyReq = widget.value().$tableData.req.o;
+
+      widget.$historyId = historyReq.replace("history:", "");
+      refreshChart(widget);
+      return;
     }
 
-    function _0x585d92() {
-        var _0x213130 = _0x56d7a8;
-        return _0x20d102['rpc']({
-            'typeSpec': _0x213130(0x1d5),
-            'method': 'checkLicense'
-        });
-    }
+    var ord = widget.value()
+      ? widget.value().getNavOrd().relativizeToSession().toString()
+      : widget.$ord;
 
-    function _0x19c6f0(_0x313426, _0x2d1f07) {
-        var _0x1727d8 = _0x56d7a8;
-        _0x313426['html'](_0x1727d8(0x1e7) + _0x2d1f07['message']), console[_0x1727d8(0x1b9)](_0x1727d8(0x20b));
-    }
+    baja.Ord.make(ord)
+      .get({
+        lease: true
+      })
+      .then(function (component) {
+        component
+          .getSlots()
+          .is("history:NumericIntervalHistoryExt")
+          .each(function (slot) {
+            var historyExt = component.get(slot);
+            var historyExtOrd = historyExt.getNavOrd().toString();
 
-    function _0x1bae40(_0x53ad82, _0x1982f8) {
-        var _0x370a36 = _0x56d7a8,
-            _0x3d8c3e = [_0x1982f8],
-            _0x2390dc = _0x1e1b6f(_0x53ad82),
-            _0x15ff73, _0x3ec69a, _0x59f865 = _0x1982f8[_0x370a36(0x22d)];
-        _0x3ec69a = _0x59f865[_0x370a36(0x1ec)] ? [_0x59f865[_0x370a36(0x235)]][_0x370a36(0x208)](_0x59f865[_0x370a36(0x1ec)]) : [], _0x15ff73 = _0x59f865[_0x370a36(0x1db)] ? ['x'][_0x370a36(0x208)](_0x59f865['xValues']) : [], _0x1982f8['width'] = _0x2390dc[_0x370a36(0x1c2)] || 0x190, _0x1982f8['height'] = _0x2390dc[_0x370a36(0x1e2)] || 0x190;
-        var _0x1b8a85 = _0x53ad82[_0x370a36(0x215)]['split'](',');
-        _0x1982f8[_0x370a36(0x1e9)] = _0x1982f8[_0x370a36(0x1c2)] / 0x2 - parseInt(_0x1b8a85[0x0]), _0x1982f8[_0x370a36(0x23a)] = _0x1982f8['height'] - parseInt(_0x1b8a85[0x1]);
-        var _0x509cd0 = _0x53ad82[_0x370a36(0x219)][_0x370a36(0x249)](',');
-        (function _0x1e710d() {
-            var _0x25663c = _0x370a36;
-            if (_0x53ad82['$chart'] !== null) {
-                _0x53ad82['$chart']['load']({
-                    'columns': [_0x15ff73, _0x3ec69a]
-                });
-                return;
-            }
-            _0x53ad82[_0x25663c(0x24e)] = _0x107686[_0x25663c(0x23c)]({
-                'bindto': _0x53ad82['$dom'],
-                'size': {
-                    'height': _0x1982f8[_0x25663c(0x1e2)],
-                    'width': _0x1982f8[_0x25663c(0x1c2)]
-                },
-                'data': {
-                    'x': 'x',
-                    'columns': [_0x15ff73, _0x3ec69a]
-                },
-                'axis': {
-                    'x': {
-                        'type': _0x25663c(0x20d),
-                        'tick': {
-                            'format': function (_0x4721c7) {
-                                var _0x5346aa = _0x25663c;
-                                return _0x15b3e4[_0x5346aa(0x1e1)](this[_0x5346aa(0x24c)][_0x5346aa(0x1f2)]()[_0x4721c7], _0x53ad82[_0x5346aa(0x1cb)], null);
-                            }
-                        }
-                    }
-                },
-                'color': {
-                    'pattern': [_0x53ad82[_0x25663c(0x1df)]]
-                },
-                'grid': {
-                    'x': {
-                        'show': !![]
-                    },
-                    'y': {
-                        'show': !![]
-                    }
-                },
-                'tooltip': {},
-                'padding': {
-                    'top': parseInt(_0x509cd0[0x0]),
-                    'right': parseInt(_0x509cd0[0x1]),
-                    'bottom': parseInt(_0x509cd0[0x2]),
-                    'left': parseInt(_0x509cd0[0x3])
-                },
-                'transition': {
-                    'duration': 0x2ee
-                },
-                'legend': {
-                    'show': !![],
-                    'position': _0x25663c(0x1de),
-                    'inset': {
-                        'anchor': _0x25663c(0x230),
-                        'x': _0x1982f8[_0x25663c(0x1e9)],
-                        'y': _0x1982f8[_0x25663c(0x23a)],
-                        'step': 0x1
-                    }
-                }
-            }), _0x121f62['select'](_0x25663c(0x1fc))[_0x25663c(0x223)](_0x25663c(0x21f))['attr']('x', 0x0)[_0x25663c(0x1ba)]('y', 0x0)[_0x25663c(0x1ba)]('width', '100%')[_0x25663c(0x1ba)](_0x25663c(0x1e2), _0x25663c(0x1dc))[_0x25663c(0x1ba)](_0x25663c(0x20c), 'none')[_0x25663c(0x1ba)]('stroke-width', _0x53ad82[_0x25663c(0x1c3)])[_0x25663c(0x1ba)](_0x25663c(0x222), _0x53ad82[_0x25663c(0x250)]), _0x121f62[_0x25663c(0x212)](_0x25663c(0x1fc))[_0x25663c(0x223)](_0x25663c(0x22f))['attr']('x', _0x53ad82[_0x25663c(0x229)])[_0x25663c(0x1ba)]('y', _0x53ad82[_0x25663c(0x23d)])[_0x25663c(0x23f)](_0x25663c(0x20e), _0x25663c(0x1e0))['style'](_0x25663c(0x25b), _0x53ad82[_0x25663c(0x1d3)])[_0x25663c(0x23f)](_0x25663c(0x238), _0x53ad82[_0x25663c(0x207)])[_0x25663c(0x22f)](_0x53ad82[_0x25663c(0x246)])['style'](_0x25663c(0x20c), _0x53ad82['$titleFontColor']), _0x4ccfec(_0x25663c(0x255))[_0x25663c(0x1f6)](_0x25663c(0x21b), _0x53ad82['$backgroundColor']);
-        }());
-    }
+            baja.Ord.make(historyExtOrd)
+              .resolve({
+                lease: true
+              })
+              .then(function (resolvedHistoryExt) {
+                var historyConfigOrd = resolvedHistoryExt
+                  .getComponent()
+                  .getHistoryConfig()
+                  .getNavOrd()
+                  .toString();
 
-    function _0x4b842c(_0x2e2890) {
-        var _0x86394d = _0x56d7a8;
-        if (_0x237be1() === ![]) {
-            while (dom[_0x86394d(0x1fe)]) {
-                dom[_0x86394d(0x1ce)](dom[_0x86394d(0x1fe)]);
-            }
-            console[_0x86394d(0x1b9)]('License Exception');
-            return;
-        }
-        _0x299ae5[_0x86394d(0x24b)](_0x2e2890)[_0x86394d(0x1c1)](function (_0x3fe180) {
-            _0x1bae40(_0x2e2890, _0x3fe180);
-        });
-    }
+                baja.Ord.make(historyConfigOrd)
+                  .resolve({
+                    lease: true
+                  })
+                  .then(function (resolvedHistoryConfig) {
+                    widget.$historyId = resolvedHistoryConfig
+                      .getComponent()
+                      .getId()
+                      .toString();
 
-    function _0x237be1() {
-        return _0x199ca2;
-    }
-    return _0x227802[_0x56d7a8(0x241)]['doInitialize'] = function (_0x2a4cb0) {
-        var _0x2226dc = _0x56d7a8;
-        _0x2a4cb0[_0x2226dc(0x1f6)](_0x2226dc(0x257), _0x2226dc(0x1f8)), window['d3'] = _0x121f62;
-        var _0x2535ec = this,
-            _0x2a8b06 = _0x2535ec['jq']();
-        _0x2a4cb0[_0x2226dc(0x253)](_0x2226dc(0x1d1)), _0x2535ec[_0x2226dc(0x21c)] = _0x2a4cb0[0x0], _0x2535ec[_0x2226dc(0x24e)] = null, _0x585d92()[_0x2226dc(0x1c1)](function (_0x277f5c) {})[_0x2226dc(0x23b)](function (_0x29c879) {
-            _0x19c6f0(_0x2535ec['jq'](), _0x29c879), _0x199ca2 = ![];
-            return;
-        }), _0x2a8b06[_0x2226dc(0x22a)]()['parent']() && (_0x2a8b06['parent']()[_0x2226dc(0x22a)]()[0x0]['id'] = _0xa5618d(0x8), _0x2a8b06[_0x2226dc(0x22a)]()[0x0][_0x2226dc(0x23f)] && (_0x2a8b06[_0x2226dc(0x22a)]()[0x0][_0x2226dc(0x23f)][_0x2226dc(0x257)] = _0x2226dc(0x1f8))), _0x2535ec['$backgroundColor'] = _0x2535ec[_0x2226dc(0x210)] ? _0x2535ec[_0x2226dc(0x210)] : _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x1e3)) ? _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x1e3)) : _0x51cd4f[_0x2226dc(0x251)], _0x2535ec[_0x2226dc(0x250)] = _0x2535ec[_0x2226dc(0x250)] ? _0x2535ec[_0x2226dc(0x250)] : _0x2535ec[_0x2226dc(0x1be)]()['getValue'](_0x2226dc(0x1d9)) ? _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x1d9)) : _0x51cd4f[_0x2226dc(0x245)], _0x2535ec[_0x2226dc(0x1c3)] = _0x2535ec['$borderThickness'] ? _0x2535ec[_0x2226dc(0x1c3)] : _0x2535ec['properties']()[_0x2226dc(0x1ea)]('borderThickness') ? _0x2535ec['properties']()[_0x2226dc(0x1ea)]('borderThickness') : _0x51cd4f[_0x2226dc(0x21a)], _0x2535ec[_0x2226dc(0x1cb)] = _0x2535ec['$dateFormat'] ? _0x2535ec[_0x2226dc(0x1cb)] : _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x237)) ? _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x237)) : _0x51cd4f[_0x2226dc(0x24a)], _0x2535ec[_0x2226dc(0x215)] = _0x2535ec['$legendLocation'] ? _0x2535ec['$legendLocation'] : _0x2535ec['properties']()['getValue'](_0x2226dc(0x242)) ? _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x242)) : _0x51cd4f[_0x2226dc(0x242)], _0x2535ec['$lineColor'] = _0x2535ec['$lineColor'] ? _0x2535ec[_0x2226dc(0x1df)] : _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x1d0)) ? _0x2535ec[_0x2226dc(0x1be)]()['getValue']('lineColor') : _0x51cd4f[_0x2226dc(0x1d0)], _0x2535ec[_0x2226dc(0x219)] = _0x2535ec['$padding'] ? _0x2535ec[_0x2226dc(0x219)] : _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x211)) ? _0x2535ec['properties']()['getValue'](_0x2226dc(0x211)) : _0x51cd4f['padding'], _0x2535ec['$refreshInterval'] = _0x2535ec[_0x2226dc(0x23e)] ? _0x2535ec[_0x2226dc(0x23e)] : _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)]('refreshInterval') ? _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)]('refreshInterval') : 0xea60, _0x2535ec['$titleFontSize'] = _0x2535ec[_0x2226dc(0x1d3)] ? _0x2535ec['$titleFontSize'] : _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x1ff)) ? _0x2535ec['properties']()[_0x2226dc(0x1ea)](_0x2226dc(0x1ff)) : _0x51cd4f[_0x2226dc(0x1ff)], _0x2535ec[_0x2226dc(0x1f4)] = _0x2535ec[_0x2226dc(0x1f4)] ? _0x2535ec[_0x2226dc(0x1f4)] : _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x1c4)) ? _0x2535ec[_0x2226dc(0x1be)]()['getValue']('titleFontColor') : _0x51cd4f[_0x2226dc(0x1c4)], _0x2535ec[_0x2226dc(0x207)] = _0x2535ec['$titleFontWeight'] ? _0x2535ec[_0x2226dc(0x207)] : _0x2535ec[_0x2226dc(0x1be)]()['getValue'](_0x2226dc(0x205)) ? _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x205)) : _0x51cd4f[_0x2226dc(0x205)], _0x2535ec[_0x2226dc(0x229)] = _0x2535ec['$titleXOffset'] ? _0x2535ec[_0x2226dc(0x229)] : _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)]('titleXOffset') ? _0x2535ec['properties']()[_0x2226dc(0x1ea)](_0x2226dc(0x1f7)) : _0x51cd4f[_0x2226dc(0x1f7)], _0x2535ec[_0x2226dc(0x23d)] = _0x2535ec['$titleYOffset'] ? _0x2535ec['$titleYOffset'] : _0x2535ec['properties']()[_0x2226dc(0x1ea)](_0x2226dc(0x1dd)) ? _0x2535ec['properties']()[_0x2226dc(0x1ea)](_0x2226dc(0x1dd)) : _0x51cd4f[_0x2226dc(0x1dd)], _0x2535ec[_0x2226dc(0x246)] = _0x2535ec['$title'] ? _0x2535ec[_0x2226dc(0x246)] : _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x209)) ? _0x2535ec['properties']()['getValue']('title') : _0x51cd4f[_0x2226dc(0x24d)], _0x2535ec[_0x2226dc(0x258)] = _0x2535ec[_0x2226dc(0x258)] ? _0x2535ec[_0x2226dc(0x258)] : _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x1ed)) ? _0x2535ec['properties']()[_0x2226dc(0x1ea)](_0x2226dc(0x1ed)) : '', _0x2535ec['$limit'] = _0x2535ec[_0x2226dc(0x218)] ? _0x2535ec[_0x2226dc(0x218)] : _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)]('limit') ? _0x2535ec['properties']()[_0x2226dc(0x1ea)]('limit') : _0x51cd4f[_0x2226dc(0x214)], _0x2535ec[_0x2226dc(0x236)] = _0x2535ec[_0x2226dc(0x236)] ? _0x2535ec[_0x2226dc(0x236)] : _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x1e4)) ? _0x2535ec[_0x2226dc(0x1be)]()[_0x2226dc(0x1ea)](_0x2226dc(0x1e4)) : _0x51cd4f[_0x2226dc(0x1e4)], _0x5b0542 = setInterval(function () {
-            _0x4b842c(_0x2535ec);
-        }, _0x2535ec['$refreshInterval']);
-    }, _0x227802[_0x56d7a8(0x241)]['doLayout'] = function () {}, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x244)] = function (_0x560c45, _0x2810b8) {
-        _0x4b842c(this);
-    }, _0x227802[_0x56d7a8(0x241)]['doDestroy'] = function () {
-        this['jq']()['removeClass']('SimpleLineChartWidgetOuter'), _0x5b0542 && clearInterval(_0x5b0542);
-    }, _0x227802[_0x56d7a8(0x241)][_0x56d7a8(0x203)] = function () {
-        var _0x524a05 = _0x56d7a8,
-            _0x1f193e = this;
-        if (_0x1f193e[_0x524a05(0x254)]()[_0x524a05(0x1c5)]) {
-            var _0x526743 = _0x1f193e[_0x524a05(0x254)]()[_0x524a05(0x1c5)][_0x524a05(0x21e)]['o'];
-            _0x1f193e[_0x524a05(0x1f0)] = _0x526743[_0x524a05(0x1cc)]('history:', ''), _0x4b842c(_0x1f193e);
-        } else {
-            var _0x173eec = _0x1f193e['value']() ? _0x1f193e[_0x524a05(0x254)]()[_0x524a05(0x1fb)]()[_0x524a05(0x1e8)]()[_0x524a05(0x1c8)]() : _0x1f193e[_0x524a05(0x1d8)];
-            _0x20d102[_0x524a05(0x20a)][_0x524a05(0x1f9)](_0x173eec)[_0x524a05(0x1bf)]({
-                'lease': !![]
-            })[_0x524a05(0x1c1)](function (_0x53875f) {
-                var _0x1b1c8c = _0x524a05;
-                _0x53875f['getSlots']()['is']('history:NumericIntervalHistoryExt')[_0x1b1c8c(0x221)](function (_0xfa0212) {
-                    var _0x529874 = _0x1b1c8c,
-                        _0x241175 = _0x53875f[_0x529874(0x1bf)](_0xfa0212),
-                        _0x322069 = _0x241175['getNavOrd']()[_0x529874(0x1c8)]();
-                    _0x20d102[_0x529874(0x20a)][_0x529874(0x1f9)](_0x322069)[_0x529874(0x1f5)]({
-                        'lease': !![]
-                    })[_0x529874(0x1c1)](function (_0x9c44b8) {
-                        var _0x2a26dc = _0x529874,
-                            _0x3d84fb = _0x9c44b8[_0x2a26dc(0x1fd)]()[_0x2a26dc(0x1c7)]()[_0x2a26dc(0x1fb)]()['toString']();
-                        _0x20d102['Ord'][_0x2a26dc(0x1f9)](_0x3d84fb)[_0x2a26dc(0x1f5)]({
-                            'lease': !![]
-                        })[_0x2a26dc(0x1c1)](function (_0x27a108) {
-                            var _0x55c931 = _0x2a26dc;
-                            _0x1f193e[_0x55c931(0x1f0)] = _0x27a108[_0x55c931(0x1fd)]()['getId']()[_0x55c931(0x1c8)](), _0x4b842c(_0x1f193e);
-                        })['catch'](function (_0x3bc589) {
-                            var _0x4a3f89 = _0x2a26dc;
-                            _0x20d102[_0x4a3f89(0x1bb)]('ORD Error getting history historyConfigOrd: ' + _0x3bc589);
-                        });
-                    })[_0x529874(0x23b)](function (_0x125afb) {
-                        var _0x27b186 = _0x529874;
-                        _0x20d102[_0x27b186(0x1bb)](_0x27b186(0x21d) + _0x125afb);
-                    });
-                });
-            })[_0x524a05(0x23b)](function (_0x421b4c) {
-                var _0x28bb92 = _0x524a05;
-                _0x20d102[_0x28bb92(0x1bb)](_0x28bb92(0x1e5) + _0x421b4c);
-            });
-        }
-    }, _0x227802;
-}));
+                    refreshChart(widget);
+                  })
+                  .catch(function (error) {
+                    baja.error(
+                      "ORD Error getting history historyConfigOrd: " + error
+                    );
+                  });
+              })
+              .catch(function (error) {
+                baja.error("ORD Error getting history ext component: " + error);
+              });
+          });
+      })
+      .catch(function (error) {
+        baja.error("ORD Error getting component: " + error);
+      });
+  };
 
-function _0x5dd3() {
-    var _0x420591 = ['getComponent', 'firstChild', 'titleFontSize', 'jquery', 'css!nmodule/simpleLineChart/rc/simpleLineChartWidget', 'create', 'doLoad', '100,120', 'titleFontWeight', '814588AMaNrL', '$titleFontWeight', 'concat', 'title', 'Ord', 'Unlicensed', 'fill', 'category', 'text-anchor', 'setRefreshPeriod', '$backgroundColor', 'padding', 'select', 'constructor', 'limit', '$legendLocation', 'setLineColor', '#3D3D3D', '$limit', '$padding', 'defaultBorderThickness', 'background-color', '$dom', 'ORD Error getting history ext component: ', 'req', 'rect', '14XaXWGw', 'each', 'stroke', 'append', 'round', 'setTitleXOffset', 'setTitleYOffset', 'setHistoryBql', 'd/M/yy', '$titleXOffset', 'parent', 'setTitleFontWeight', 'css!nmodule/simpleLineChart/rc/c3/c3.min', 'chartValues', '|bql:select timestamp, value order by timestamp DESC', 'text', 'top-right', 'refreshInterval', '776CWsONN', 'bold', 'apply', 'valueText', '$offset', 'dateFormat', 'font-weight', '1937814pfzLqG', 'legendy', 'catch', 'generate', '$titleYOffset', '$refreshInterval', 'style', 'setTitleFontColor', 'prototype', 'legendLocation', '#727272', 'doChanged', 'defaultBorderColor', '$title', 'add', 'bajaux/Widget', 'split', 'defaultDateFormat', 'resolveData', 'api', 'defaultTitle', '$chart', '#fff', '$borderColor', 'defaultBackgroundColor', '4809228uRFmox', 'addClass', 'value', '.SimpleLineChartWidgetOuter', '60,80,60,80', 'overflow', '$historyBql', 'baja!', '16px', 'font-size', 'log', 'attr', 'error', 'setOffset', '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 'properties', 'get', 'bajaux/mixin/subscriberMixIn', 'then', 'width', '$borderThickness', 'titleFontColor', '$tableData', 'Chart 1', 'getHistoryConfig', 'toString', '1067826WGvbEz', '288621nNQoUa', '$dateFormat', 'replace', 'setTitle', 'removeChild', '1311184jpTkjD', 'lineColor', 'SimpleLineChartWidgetOuter', 'setLegendLocation', '$titleFontSize', 'nmodule/simpleLineChart/rc/c3/c3.min', 'simpleLineChart:SimpleLineChartWidget', '3767345zqRfmf', 'setLimit', '$ord', 'borderColor', 'setBorderColor', 'xValues', '100%', 'titleYOffset', 'inset', '$lineColor', 'middle', 'formatDate', 'height', 'backgroundColor', 'offset', 'ORD Error getting component: ', 'borderThickness', 'Your station is not licensed for this widget: ', 'relativizeToSession', 'legendx', 'getValue', 'nmodule/simpleLineChart/rc/dateUtil', 'yValues', 'historyBql', 'setTitleFontSize', 'nmodule/simpleLineChart/rc/d3/d3.v3.min', '$historyId', 'setPadding', 'categories', 'length', '$titleFontColor', 'resolve', 'css', 'titleXOffset', 'hidden', 'make', 'nmodule/simpleLineChart/rc/modelHistory', 'getNavOrd', 'svg'];
-    _0x5dd3 = function () {
-        return _0x420591;
-    };
-    return _0x5dd3();
-};
+  return SimpleLineChartWidget;
+});
