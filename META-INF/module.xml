@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+<module name='simpleLineChart-ux' bajaVersion='0' vendor='WSE Ltd.' vendorVersion='2.0.1' description='A Line chart with sequential data for Niagara 4.' preferredSymbol='smplec' nre='true' installable='true' autoload='true' buildMillis='1730740548967' buildHost='DESKTOP-U5RVUVM' moduleName='simpleLineChart' runtimeProfile='ux'>
+	<dependencies>
+		<dependency name='baja' vendor='Tridium' vendorVersion='4.0'/>
+		<dependency name='js-ux' vendor='Tridium' vendorVersion='4.0'/>
+		<dependency name='net-rt' vendor='Tridium' vendorVersion='4.0'/>
+		<dependency name='platform-rt' vendor='Tridium' vendorVersion='4.0'/>
+		<dependency name='web-rt' vendor='Tridium' vendorVersion='4.0'/>
+	</dependencies>
+	<dirs/>
+	<types>
+		<type name='SimpleLineChartWidget' class='com.wse.simpleLineChart.BSimpleLineChartWidget'></type>
+		<type name='SimpleLineChartJsBuild' class='com.wse.simpleLineChart.BSimpleLineChartJsBuild'></type>
+	</types>
+</module>

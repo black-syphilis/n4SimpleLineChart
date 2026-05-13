@@ -1,0 +1,296 @@
+﻿<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Simple Line Chart Widget Quick Start</title>
+
+    <style type="text/css">
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+
+    </style>
+
+</head>
+
+<body>
+
+    <div>
+
+        <!--Description-->
+        <div>
+            <p>
+                Name: simpleLineChart-ux
+                <br /> Resources: none
+                <br /> References: d3.js V3, c3.js
+            </p>
+        </div>
+
+        <!--Overview-->
+        <div>
+            <h3>Overview:</h3>
+            <p>
+                The chart has a number of configurable properties that can be used to modify look, feel, and functionality.
+
+                <h3>Usage:</h3>
+                Drag and drop the chart widget from the palette onto your px view:
+
+                <div>
+                    <br />
+                    <img alt="Image" src="img/usage1.png" height="370px" width="781px" style="max-width: 100%; ">
+                </div>
+            </p>
+        </div>
+        <!--Properties-->
+        <div>
+            <h3>Licensing:</h3>
+            <p>
+                For versions 1.x - The widget must be licensed with us.  Licenses are bound to the stations host Id. <a href="mailto:support@wse-ltd.com">Email</a> us your host id(s) so we can generate a license for you.
+                <br />
+                You must add our licensing module to your station services. This module retrieves the license from our servers and save it to your stations
+                shared folder directory.  <br />
+                The widget can still be used and configured but will disable itself after a few seconds.
+                <br />
+                Note: you must have a valid internet connection at least once to get the license file.
+                <div>
+                    <img alt="Image" src="img/licensing.png" height="294px" width="331px" style="max-width: 100%; ">
+                </div>
+
+            </p>
+            <p>
+                For versions 2.x + licensing is done via Niagara Central.
+            </p>
+            <h3>Properties:</h3>
+            <p>
+                The chart has a number of configurable properties that can be used to modify look, feel, and functionality. Change the properties
+                as required:
+
+                <div>
+                    <img alt="Image" src="img/usage2.png" height="751px" width="558px" style="max-width: 100%; ">
+                </div>
+
+            </p>
+
+            <p>
+            <p>
+                <strong>There is 1 main ord value references.</strong>
+            </p>
+            <p>
+                Ord Value - this is the live value of the meter or the main meter value. The ord reference should
+                be a numeric point or numeric writable. It can an absolute ord, e.g. <br />
+                station:|slot:/Drivers/NiagaraNetwork/AHU5 or relativised ORD e.g. <br />
+                slot:AHU5 <br />
+                The ord should point to a numeric point/writable that has a numeric interval extension.
+            </p>
+            <p>
+                <strong>Changing Widget Properties</strong> - most properties are self-explanatory but some require some explaining.
+            </p>
+            <p>
+                <strong>Date Format</strong>
+            </p>
+            <p>
+                Examples:
+                <ul style="list-style:none;">
+                    <li>
+                        dddd h:mmtt d MMM yyyy = Friday 9:49am 19 Jan 2018
+                    </li>
+                    <li>
+                        M/d/y = 1/19/2018
+                    </li>
+                    <li>
+                        HH:mm:ss = 09:49:29
+                    </li>
+                    <li>
+                        hh:mm:ss TT = 09:49:39 AM
+                    </li>
+                    <li>
+                        yy/M/d = 18/1/19
+                    </li>
+                    <li>
+                        ddd MMM d \a\t h:mm TT = Fri Jan 19 at 9:49 AM
+                    </li>
+                </ul>
+            </p>
+        </div>
+
+        <!--History Binding-->
+        <div>
+            <h3>History Binding:</h3>
+            <p>
+                You can bind the chart to a history bql query. Change the properties as required:
+
+            </p>
+            <p>
+                <strong>1. Set the value binding to an absolute or relativised ORD.</strong>
+                Example: station:|slot:/Drivers/NiagaraNetwork/AHU1<br />
+
+                <strong>2. Set the history BQL property.</strong>
+
+                Example: |bql:select timestamp,value as 'Kw' order by timestamp DESC
+            </p>
+        </div>
+
+        <!--Use in Html Page-->
+        <p>
+            <h3>Using in your HTML page:</h3>
+            You can now use the widget in your custom html page as long as the html file is in a appropriate file directory. <br />
+            E.g. C:/users/admin/niagara/vykon/station/stationName/shared/webfiles/demo1.html
+        </p>
+        <p>
+            1. Create an html page and place in your station files directory. <br />
+            2. Create a div element and give it an id so you can inject the widget into this area. E.g.: widget1 <br />
+            3. Add the following script before the closing head tag. E.g.: 
+<xmp>
+    <script type="text/javascript"
+            src="/module/js/com/tridium/js/ext/require/require.min.js"></script>
+    <script>
+        require(['/module/simpleLineChart/rc/simpleLineChartWidget.run.js'], function (app) {
+
+            app.initialiseSimpleChart({                             
+                backgroundColor: '#3D3D3D',
+                borderColor: '#727272',
+                borderThickness: 4,
+                dateFormat: 'd/M/yy HH:mm:ss',
+                divId: '#widget1',     
+                historyBql: "|bql:select timestamp,value as 'Kw' order by timestamp DESC", 
+                legendLocation: '100,120',
+                limit: 10,
+                lineColor: '#1f77b4',
+                offset: 0,
+                ord: 'station:|slot:/Drivers/NiagaraNetwork/AHU2', // only absolute ord here
+                padding: '60,80,60,80',
+                titleFontColor: '#fff',
+                titleFontSize: '16px',
+                titleFontWeight: 'bold',
+                titleXOffset: 50,
+                titleYOffset: 40,
+                title: 'Chart 1',
+            });
+        });
+    </script>
+    </head>  
+    <!--Rest of your html below...-->
+</xmp>
+            <br />
+            4. Change the configuration values as required.
+        </p>
+
+        <p>
+            <h3>Add your own CSS file:</h3>
+            1. Using the demo1.html file created above, you can also use your own css for further customisation. 
+            Add the following before the closing head section to bring in your css (Note: the following href points to the default css file):
+<xmp>
+    <link rel="stylesheet" href="/module/simpleLineChart/rc/simpleLineChartWidget.css" type="text/css" />
+</xmp>
+            <br />
+            2. The default CSS file is as follows. Modify as needed:
+<xmp>
+    .demo1 {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        float: left;
+    }
+
+    .bajaux-widget-max {
+        background-color: white;
+        overflow: hidden;
+        height: 300px;
+        width: 300px;
+        display: inline-block;
+    }
+
+    .bajaux-max {
+        overflow: hidden;
+        height: 100%;
+        width: 100%;
+        display: inline-block;
+    }
+
+    .SimpleLineChartWidgetOuter {
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .bajaux-widget-outer {
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .bajaux-widget-outer > div.SimpleLineChartWidgetOuter.bajaux-widget {
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .SimpleLineChartWidget .title text, .SimpleLineChartWidget .valueText text {
+        font-size: 16px;
+        font-weight: 100;
+    }
+
+    .SimpleLineChartWidget .label text {
+        font-size: 13px;
+    }
+
+
+</xmp>           
+        </p>
+    </div>
+
+    <!--Change Log-->
+    <div>
+        <h3>Change Log:</h3>
+        <p>
+            <h4>Version 2.0.0</h4>
+            <ul>
+                <li>Licensing now done via Niagara Central.</li>
+            </ul>
+        </p>
+        <p>
+            <h4>Version 1.2.3:</h4>
+            <ul>
+                <li>Allows you to reference a history ord or point ord to resolve history data.</li>
+            </ul>
+        </p>
+        <p>
+            <h4>Version 1.2.2:</h4>
+            <ul>
+                <li>Fixed scrollbar issue for 4.6.</li>
+            </ul>
+        </p>
+        <p>
+            <h4>Version 1.2.1:</h4>
+            <ul>
+                <li>Removed comments.</li>
+            </ul>
+
+        </p>
+        <p>
+            <h4>Version 1.2.0:</h4>
+            <ul>
+                <li>Allows relativised ords for main widget binding.</li>
+            </ul>
+
+        </p>
+        <p>
+            <h4>Version 1.1.0:</h4>
+            <ul>
+                <li>Support for html5 mode</li>
+            </ul>
+
+        </p>
+        <p>
+            <h4>Version 1.0.0:</h4>
+            <ul>
+                <li>1st Release</li>
+            </ul>
+
+        </p>
+    </div>
+
+
+    <p class='copyright'>Copyright &#169 2018 WSE Ltd. All rights reserved.</p>
+</body>
+
+</html>

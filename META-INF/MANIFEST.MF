@@ -1,0 +1,61 @@
+Manifest-Version: 1.0
+Implementation-Version: unspecified
+Implementation-Vendor: 
+
+Name: rc/c3/c3.min.css
+SHA-256-Digest: SAykNbu/3E98pHoAe+PW4x//SiKvh85f1/qML7b+RPs=
+
+Name: rc/SimpleLineChartWidget.js
+SHA-256-Digest: w4Q5n4sxSzfuXfX1tUK6GPW0XeD5z5VTNVH/COnFZ/o=
+
+Name: com/wse/simpleLineChart/BSimpleLineChartJsBuild.class
+SHA-256-Digest: HboVnzgnmSkWIWo/YF0XpjzQAOidumjK8gsDNuIVPh0=
+
+Name: module.palette
+SHA-256-Digest: zLJi6J/rRn2nPecUgWy9bl/WdgCUH8ooVD5yD02MEA8=
+
+Name: rc/dateUtil.js
+SHA-256-Digest: GTuX4n0di3X/b13xiSDjNi7aN+3vIzJkPQz5T50eoaA=
+
+Name: rc/simpleLineChartWidget.run.js
+SHA-256-Digest: 8Lk0u3BZEL3VEBuQP58+wsSbOdi8eVcDdQOwRjOAsY4=
+
+Name: rc/simpleLineChartWidget.css
+SHA-256-Digest: gHoYuRzgWU2YCyN3LYEy2ypwVLwpmwennyoxHZNp808=
+
+Name: rc/simpleLineChart.built.js
+SHA-256-Digest: 8spV//Abmvv7d5ZAFRpBYlitsVZMiiPMu4thk9rO1h8=
+
+Name: com/wse/simpleLineChart/BSimpleLineChartWidget.class
+SHA-256-Digest: BcFQLnL77wIDjCHUOPB3hZzUaWmszD3K7vttBGg22W0=
+
+Name: rc/modelHistory.js
+SHA-256-Digest: w1relrMjUAbJmPZRAk+s2al9woHS1x2A3DR9BiooHE8=
+
+Name: doc/img/usage2.png
+SHA-256-Digest: PzuvijOxq/CDcn4GjBvM8HdecIZ4BKpn8JAGUKaqBRU=
+
+Name: rc/c3/c3.min.js
+SHA-256-Digest: nhUPLBjdwshN8fDlWLxerzUgMBzWaOIWgn5bAkFAeWk=
+
+Name: rc/d3/d3.v3.min.js
+SHA-256-Digest: alAZpyEhsusoS4wdIHwLi3kn0EldRkWzI/CWnZK0Wzk=
+
+Name: doc/simpleLineChart-SimpleLineChartWidget.html
+SHA-256-Digest: lLGV82Swnd3+C8JY0ZoLMk1zBaSzrd2IfNxPu54u+co=
+
+Name: doc/img/licensing.png
+SHA-256-Digest: Ci0NTqZ7RoEP/uUqW9iYyE3itttX+LjR4f6hDWLz7gY=
+
+Name: simpleLineChart-ux.lexicon
+SHA-256-Digest: f1MEtUefEjQ+EO/atp1yX7rijQiB6HZBrs/jDfu2l0Y=
+
+Name: rc/simpleLineChart.built.min.js
+SHA-256-Digest: EbFwNidW2HL6GBKObFPFJEoX0/CP0oRe3Cmf0nRSHlI=
+
+Name: META-INF/module.xml
+SHA-256-Digest: BwX7WAOCFL9wGHJFfia5tW7YxI3Vkx1+SwaWGjEqCHE=
+
+Name: doc/img/usage1.png
+SHA-256-Digest: xtRByJH4MZMXlhG3d9Kl15zu0za80UErvBs4wa6eymU=
+

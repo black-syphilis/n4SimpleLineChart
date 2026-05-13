@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bajaObjectGraph version="1.0">
+<p h="1" m="b=baja" t="b:UnrestrictedFolder">
+ 
+ <!-- /SimpleLineChart -->
+ <p n="SimpleLineChart" h="5" m="wb=workbench" t="wb:WebWidget">
+  <p n="layout" m="ui=bajaui" t="ui:Layout" v="0.0,0.0,300.0,300.0"/>
+  <p n="js" t="b:Ord" v="view:simpleLineChart:SimpleLineChartWidget"/>
+  <p n="backgroundColor" h="10" m="g=gx" t="g:Brush" v="#3D3D3D" />
+  <p n="borderColor" h="20" m="g=gx" t="g:Color" v="#727272" />  
+  <p n="lineColor" h="21" m="g=gx" t="g:Brush" v="#1f77b4" />
+  <p n="titleFontColor" h="22" m="g=gx" t="g:Color" v="#fff" />
+  
+  <!-- /Chart/wbViewBinding -->
+  <p n="wbViewBinding" h="50" t="wb:WbViewBinding">
+  </p>
+  <p n="formFactor" f="rh3" m="w=web" t="w:FormFactorEnum" v="mini"/>
+ </p>
+</p>
+
+</bajaObjectGraph>
